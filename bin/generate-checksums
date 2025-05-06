@@ -1,0 +1,52 @@
+#!/usr/bin/env php
+<?php
+
+// Chemin vers le fichier autoload.php
+require dirname(__DIR__).'/vendor/autoload.php';
+
+use App\Security\Obfuscator;
+
+// Liste des fichiers critiques à vérifier
+$criticalFiles = [
+    'public/index.php',
+    'src/Security/LicenseChecker.php',
+    'src/Security/Obfuscator.php',
+    'src/Security/secure.php',
+    'src/Controller/AdminController.php',
+    'src/Controller/SecurityController.php',
+    'src/Entity/User.php',
+    'config/packages/security.yaml',
+    'config/routes.yaml',
+];
+
+$baseDir = dirname(__DIR__);
+$checksumFile = $baseDir . '/config/checksums.php';
+
+echo "Génération des checksums pour les fichiers critiques...\n";
+
+$checksums = [];
+
+foreach ($criticalFiles as $file) {
+    $filePath = $baseDir . '/' . $file;
+    
+    if (file_exists($filePath)) {
+        $content = file_get_contents($filePath);
+        $checksums[$file] = md5($content);
+        echo "Checksum généré pour $file\n";
+    } else {
+        echo "ATTENTION: Le fichier $file n'existe pas!\n";
+    }
+}
+
+// Génération du fichier de checksums
+$checksumContent = "<?php\n\n// FICHIER GÉNÉRÉ AUTOMATIQUEMENT - NE PAS MODIFIER\n\nreturn " . var_export($checksums, true) . ";\n";
+
+if (file_put_contents($checksumFile, $checksumContent)) {
+    echo "Fichier de checksums généré avec succès : " . $checksumFile . "\n";
+    
+    // Appliquer des permissions restreintes
+    chmod($checksumFile, 0440);
+    echo "Permissions restreintes appliquées au fichier de checksums.\n";
+} else {
+    echo "Erreur lors de la génération du fichier de checksums.\n";
+} 

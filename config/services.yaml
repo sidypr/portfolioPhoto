@@ -9,6 +9,7 @@ parameters:
     upload_max_size: 20M
     post_max_size: 25M
     app.path.photo_images: '%kernel.project_dir%/public/uploads/photos'
+    security.license_check: true
 
 services:
     # default configuration for services in *this* file
@@ -27,3 +28,15 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    
+    # Service de sécurité
+    App\Security\SecurityMonitor:
+        public: true
+        
+    # Service d'obfuscation
+    App\Security\Obfuscator:
+        public: true
+        
+    # Service de licence
+    App\Security\LicenseChecker:
+        public: true

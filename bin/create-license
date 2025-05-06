@@ -1,0 +1,24 @@
+#!/usr/bin/env php
+<?php
+
+// Chemin vers le fichier autoload.php
+require dirname(__DIR__).'/vendor/autoload.php';
+
+use App\Security\LicenseChecker;
+
+// Récupération des arguments
+$owner = $argv[1] ?? 'Sidy';
+$domain = $argv[2] ?? 'localhost';
+$expiryDate = $argv[3] ?? date('Y-m-d', strtotime('+1 year'));
+
+echo "Génération d'une licence de développement...\n";
+echo "Propriétaire : $owner\n";
+echo "Domaine : $domain\n";
+echo "Date d'expiration : $expiryDate\n";
+
+// Génération de la licence
+if (LicenseChecker::generateLocalLicense($owner, $domain, $expiryDate)) {
+    echo "Licence générée avec succès !\n";
+} else {
+    echo "Erreur lors de la génération de la licence.\n";
+} 

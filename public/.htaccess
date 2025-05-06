@@ -26,6 +26,30 @@ DirectoryIndex index.php
     php_value max_input_time 300
 </IfModule>
 
+# Bloquer l'accès à tout fichier commençant par un point
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Bloquer l'accès aux fichiers sensibles
+<FilesMatch "^(composer\.json|composer\.lock|symfony\.lock|package\.json|\.env.*)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Bloquer les accès directs aux répertoires
+Options -Indexes
+
+# Protection contre les attaques XSS
+<IfModule mod_headers.c>
+   Header set X-XSS-Protection "1; mode=block"
+   Header set X-Content-Type-Options "nosniff"
+   Header set X-Frame-Options "SAMEORIGIN"
+   Header set Referrer-Policy "strict-origin-when-cross-origin"
+   Header set Content-Security-Policy "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data:;"
+</IfModule>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
@@ -72,4 +96,12 @@ DirectoryIndex index.php
         RedirectMatch 307 ^/$ /index.php/
         # RedirectTemp cannot be used instead
     </IfModule>
+</IfModule>
+
+# Bloquer les bots et scanners malveillants
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTP_USER_AGENT} ^.*(nmap|nikto|wikto|sf|sqlmap|bsqlbf|w3af|acunetix|havij|appscan).*$ [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*(libwww-perl|curl|wget|python|nikto|scanner).*$ [NC]
+    RewriteRule .* - [F,L]
 </IfModule> 
