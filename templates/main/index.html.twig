@@ -1,0 +1,148 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Portfolio Photographique{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* Admin controls */
+    .admin-controls {
+        position: relative;
+        margin-bottom: 30px;
+    }
+    
+    .admin-button {
+        display: inline-block;
+        background: #212529;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 0;
+        text-decoration: none;
+        font-size: 0.9rem;
+        letter-spacing: 0.1em;
+        transition: all 0.3s ease;
+    }
+    
+    .admin-button:hover {
+        background: #000;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .admin-button i {
+        margin-right: 8px;
+    }
+
+    {% if background_photo is defined and background_photo %}
+    .hero {
+        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3)), url('{{ asset('uploads/photos/' ~ background_photo.filename) }}');
+        background-size: cover;
+        background-position: center center;
+        background-attachment: fixed;
+        color: white;
+    }
+    .hero h1, .hero .subtitle {
+        color: white;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    }
+    {% endif %}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="hero">
+    <div class="hero-content">
+        <h1>CAROLINE DUBOIS</h1>
+        <p class="subtitle">Photographie artistique & reportages</p>
+        <a href="{{ path('app_gallery') }}" class="btn-outline-primary">Découvrir mes œuvres</a>
+    </div>
+</div>
+
+{% if is_granted('ROLE_ADMIN') %}
+<div class="container my-4">
+    <div class="admin-controls text-center">
+        <a href="{{ path('app_photo_index') }}" class="admin-button"><i class="bi bi-gear"></i>Gérer les photos</a>
+        <a href="{{ path('app_photo_new') }}" class="admin-button ms-2"><i class="bi bi-plus-circle"></i>Ajouter une photo</a>
+    </div>
+</div>
+{% endif %}
+
+<section class="container">
+    <h2 class="section-title">Explorez mon univers photographique</h2>
+    <div class="gallery-grid">
+        {% for photo in featured_photos %}
+            <div class="gallery-item">
+                <a href="{{ asset('uploads/photos/' ~ photo.filename) }}" class="gallery-link">
+                    <img src="{{ asset('uploads/photos/' ~ photo.filename) }}" alt="{{ photo.title }}" class="gallery-img">
+                    <div class="gallery-overlay">
+                        <h5>{{ photo.title }}</h5>
+                        <span class="badge">{{ photo.category }}</span>
+                        {% if is_granted('ROLE_ADMIN') %}
+                        <div class="mt-2">
+                            <a href="{{ path('app_photo_edit', {'id': photo.id}) }}" class="btn btn-sm btn-light" onclick="event.stopPropagation();">
+                                <i class="bi bi-pencil"></i> Modifier
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-5">
+        <a href="{{ path('app_gallery') }}" class="btn-outline">Voir toute la galerie</a>
+    </div>
+</section>
+
+<section class="intro-section">
+    <div class="container">
+        <div class="intro-content">
+            <h2>À propos de moi</h2>
+            <p>Passionnée de photographie depuis plus de 15 ans, je capture l'essence des moments précieux et des paysages extraordinaires. Mon approche combine technique et sensibilité pour créer des images qui racontent une histoire.</p>
+            <a href="{{ path('app_about') }}" class="btn-outline">En savoir plus</a>
+        </div>
+    </div>
+</section>
+
+<section class="container">
+    <h2 class="section-title">Témoignages</h2>
+    <div class="testimonial-grid">
+        <div class="testimonial-item">
+            <p class="testimonial-text">"Caroline a su capturer l'essence de notre mariage avec une sensibilité remarquable. Chaque photo est une œuvre d'art qui nous replonge dans ces moments précieux."</p>
+            <p class="testimonial-author">- Marie & Thomas</p>
+        </div>
+        <div class="testimonial-item">
+            <p class="testimonial-text">"Un regard unique qui transforme des scènes ordinaires en images extraordinaires. Son talent pour jouer avec la lumière est incomparable."</p>
+            <p class="testimonial-author">- Galerie Moderne, Paris</p>
+        </div>
+        <div class="testimonial-item">
+            <p class="testimonial-text">"Les photos de notre campagne publicitaire ont dépassé toutes nos attentes. Caroline a parfaitement traduit notre vision en images percutantes."</p>
+            <p class="testimonial-author">- Maison Élégance</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Vous avez un projet en tête ?</h2>
+            <p>Contactez-moi pour discuter de votre vision et créer ensemble des images qui vous ressemblent.</p>
+            <a href="{{ path('app_contact') }}" class="btn-filled">Me contacter</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Empêcher que les clicks sur les boutons d'administration ne redirigent vers la page de la photo
+        document.querySelectorAll('.gallery-overlay a').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+    });
+</script>
+{% endblock %} 

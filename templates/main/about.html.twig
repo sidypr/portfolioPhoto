@@ -1,0 +1,133 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}À propos - Portfolio Photo{% endblock %}
+
+{% block body %}
+    <section class="bg-light py-5 mb-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h1 class="mb-3">À propos de nous</h1>
+                <p class="lead text-muted">Découvrez notre passion pour la photographie et notre équipe de professionnels</p>
+                
+                {% if is_granted('ROLE_ADMIN') %}
+                <div class="admin-controls mt-3">
+                    <a href="{{ path('app_content_edit', {'id': about_image.id}) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Modifier l'image
+                    </a>
+                    <a href="{{ path('app_content_edit', {'id': about_history.id}) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Modifier l'histoire
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    {% if about_image.imageFilename %}
+                        <img src="{{ asset('uploads/content/' ~ about_image.imageFilename) }}" alt="À propos" class="img-fluid rounded shadow">
+                    {% else %}
+                        <img src="{{ asset('images/about.jpg') }}" alt="À propos" class="img-fluid rounded shadow">
+                    {% endif %}
+                </div>
+                <div class="col-lg-6">
+                    <h2 class="mb-4">{{ about_history.title }}</h2>
+                    {{ about_history.content|raw }}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container mb-5">
+        <div class="text-center mb-5">
+            <h2 class="mb-3">{{ about_mission.title }}</h2>
+            <p class="text-muted">{{ about_mission.content|raw }}</p>
+            
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="admin-controls mt-3">
+                <a href="{{ path('app_content_edit', {'id': about_mission.id}) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-pencil"></i> Modifier la mission
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-block mb-3">
+                            <i class="bi bi-camera fs-1 text-primary"></i>
+                        </div>
+                        <h3 class="card-title h5 mb-3">Qualité exceptionnelle</h3>
+                        <p class="card-text text-muted">Nous utilisons uniquement des équipements professionnels et des techniques avancées pour garantir des images de la plus haute qualité.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-block mb-3">
+                            <i class="bi bi-heart fs-1 text-primary"></i>
+                        </div>
+                        <h3 class="card-title h5 mb-3">Passion et créativité</h3>
+                        <p class="card-text text-muted">Notre passion pour la photographie nous pousse à explorer de nouvelles idées et perspectives pour créer des images uniques.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-block mb-3">
+                            <i class="bi bi-people fs-1 text-primary"></i>
+                        </div>
+                        <h3 class="card-title h5 mb-3">Service client</h3>
+                        <p class="card-text text-muted">Nous nous engageons à offrir un service personnalisé et à dépasser les attentes de nos clients à chaque projet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="mb-3">Notre équipe</h2>
+                <p class="text-muted">Rencontrez nos photographes professionnels</p>
+                
+                {% if is_granted('ROLE_ADMIN') %}
+                <div class="admin-controls mt-3">
+                    {% for member in team_members %}
+                    <a href="{{ path('app_content_edit', {'id': member.id}) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Modifier {{ member.title }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="row g-4">
+                {% for member in team_members %}
+                <div class="col-md-3 col-6">
+                    <div class="card border-0 shadow-sm">
+                        {% if member.imageFilename %}
+                            <img src="{{ asset('uploads/content/' ~ member.imageFilename) }}" class="card-img-top" alt="{{ member.title }}">
+                        {% else %}
+                            <img src="{{ asset('images/about.jpg') }}" class="card-img-top" alt="{{ member.title }}">
+                        {% endif %}
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ member.title }}</h5>
+                            <p class="text-muted">{{ member.content|raw }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="container py-5 text-center">
+        <h2 class="mb-4">Prêt à travailler avec nous ?</h2>
+        <p class="lead mb-5">Contactez-nous dès aujourd'hui pour discuter de votre projet photographique</p>
+        <a href="{{ path('app_contact') }}" class="btn btn-primary btn-lg">Contactez-nous</a>
+    </section>
+{% endblock %} 

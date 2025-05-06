@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion | Administration{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-body p-5">
+                    <h1 class="h3 mb-4 text-center">Connexion</h1>
+
+                    {% if error %}
+                        <div class="alert alert-danger">
+                            {{ error.messageKey|trans(error.messageData, 'security') }}
+                        </div>
+                    {% endif %}
+
+                    {% if error_message is defined and error_message %}
+                        <div class="alert alert-warning">
+                            {{ error_message }}
+                        </div>
+                    {% endif %}
+
+                    {# Message d'aide pour le debug #}
+                    <div class="alert alert-info mb-4">
+                        <p>Pour vous connecter, utilisez:</p>
+                        <ul class="mb-0">
+                            <li><strong>Email:</strong> admin@portfolio.com</li>
+                            <li><strong>Mot de passe:</strong> password123</li>
+                        </ul>
+                    </div>
+
+                    <form method="post">
+                        <div class="mb-3">
+                            <label for="inputEmail" class="form-label">Email</label>
+                            <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="inputPassword" class="form-label">Mot de passe</label>
+                            <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
+                        </div>
+
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button class="btn btn-primary" type="submit">
+                                Se connecter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

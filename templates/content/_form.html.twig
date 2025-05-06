@@ -1,0 +1,42 @@
+{{ form_start(form, {'attr': {'class': 'content-form'}}) }}
+    {{ form_errors(form) }}
+
+    <div class="mb-3">
+        {{ form_label(form.identifier, 'Identifiant unique', {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.identifier, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.identifier) }}
+        {{ form_help(form.identifier) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.section, 'Section', {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.section, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.section) }}
+        {{ form_help(form.section) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.title, 'Titre', {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.title) }}
+    </div>
+    
+    <div class="mb-3">
+        {{ form_label(form.content, 'Contenu', {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.content, {'attr': {'class': 'wysiwyg-editor'}}) }}
+        {{ form_errors(form.content) }}
+        <div class="form-text">Utilisez l'éditeur ci-dessus pour formater votre contenu.</div>
+    </div>
+    
+    <div class="mb-3">
+        {{ form_label(form.imageFile, 'Image', {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}
+        <div class="form-text">Formats acceptés : JPG, PNG, WebP. Taille max : 20Mo</div>
+        {{ form_errors(form.imageFile) }}
+        {{ form_help(form.imageFile) }}
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
+    </div>
+{{ form_end(form) }} 

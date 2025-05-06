@@ -1,0 +1,529 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Galerie - Portfolio Photo{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Galerie masonry */
+        .gallery-masonry {
+            margin: 0 auto;
+            width: 100%;
+            column-count: 3;
+            column-gap: 15px;
+        }
+        
+        @media (max-width: 1200px) {
+            .gallery-masonry {
+                column-count: 3;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .gallery-masonry {
+                column-count: 2;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .gallery-masonry {
+                column-count: 1;
+            }
+        }
+        
+        .gallery-item {
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 15px;
+            break-inside: avoid;
+            position: relative;
+            overflow: hidden;
+            border-radius: 0;
+            background-color: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        
+        .gallery-item:hover img {
+            transform: scale(1.03);
+        }
+        
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .gallery-item:hover .gallery-overlay {
+            opacity: 1;
+        }
+        
+        .gallery-overlay h5 {
+            margin: 0 0 5px 0;
+            font-weight: 400;
+            font-size: 1.2rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .gallery-overlay .badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.7rem;
+        }
+        
+        /* Filtres */
+        .filters-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        .filter-btn {
+            margin: 0 5px 10px;
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid #eee;
+            border-radius: 0;
+            color: #333;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background-color: #f8f9fa;
+            border-color: #ddd;
+        }
+        
+        /* Admin controls */
+        .admin-controls {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        
+        .admin-button {
+            display: inline-block;
+            background: #212529;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 0;
+            text-decoration: none;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-button:hover {
+            background: #000;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .admin-button i {
+            margin-right: 8px;
+        }
+
+        /* Arrière-plan de la section titre */
+        {% if background_photo is defined and background_photo %}
+        .gallery-header {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('{{ asset('uploads/photos/' ~ background_photo.filename) }}');
+            background-position: center;
+            background-size: cover;
+            color: white;
+            padding: 6rem 0;
+            margin-bottom: 3rem;
+            /* Empêcher le zoom sur l'image de fond */
+            touch-action: pan-x pan-y;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .gallery-header h1, .gallery-header p, .gallery-header .text-muted {
+            color: white !important;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        {% endif %}
+        
+        /* Lightbox personnalisé */
+        .custom-lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            touch-action: none;
+        }
+        
+        .lightbox-active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .lightbox-image-container {
+            position: relative;
+            max-width: 90%;
+            max-height: 80%;
+            margin: 0 auto;
+        }
+        
+        .lightbox-image {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            display: block;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .lightbox-caption {
+            color: white;
+            text-align: center;
+            padding: 15px;
+            width: 100%;
+            font-size: 1rem;
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 10000;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .lightbox-close:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+            transform: scale(1.1);
+        }
+        
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            width: 50px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            z-index: 10000;
+        }
+        
+        .lightbox-nav:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .lightbox-prev {
+            left: 20px;
+        }
+        
+        .lightbox-next {
+            right: 20px;
+        }
+        
+        .lightbox-counter {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 0.9rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+        
+        /* Pour les appareils mobiles */
+        @media (max-width: 768px) {
+            .lightbox-nav {
+                font-size: 1.5rem;
+                width: 40px;
+                height: 50px;
+            }
+            
+            .lightbox-prev {
+                left: 10px;
+            }
+            
+            .lightbox-next {
+                right: 10px;
+            }
+            
+            .lightbox-close {
+                top: 10px;
+                right: 10px;
+                font-size: 1.5rem;
+                width: 35px;
+                height: 35px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    {% if background_photo is defined and background_photo %}
+    <section class="gallery-header mb-5">
+        <div class="container text-center">
+            <h1 class="display-4 mb-3">Galerie Photographique</h1>
+            <p class="lead">Explorez ma collection d'images uniques et inspirantes</p>
+            
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="admin-controls text-center mt-4">
+                <a href="{{ path('app_photo_index') }}" class="admin-button"><i class="bi bi-gear"></i>Gérer les photos</a>
+                <a href="{{ path('app_photo_new') }}" class="admin-button ms-2"><i class="bi bi-plus-circle"></i>Ajouter une photo</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    {% else %}
+    <section class="container py-5">
+        <div class="text-center mb-5">
+            <h1 class="display-4 mb-3">Galerie Photographique</h1>
+            <p class="lead text-muted">Explorez ma collection d'images uniques et inspirantes</p>
+            
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="admin-controls text-center mt-4">
+                <a href="{{ path('app_photo_index') }}" class="admin-button"><i class="bi bi-gear"></i>Gérer les photos</a>
+                <a href="{{ path('app_photo_new') }}" class="admin-button ms-2"><i class="bi bi-plus-circle"></i>Ajouter une photo</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    {% endif %}
+
+    <div class="container">
+        <div class="mb-5">
+            <div class="filters-container">
+                <a href="{{ path('app_gallery') }}" class="filter-btn {{ app.request.attributes.get('_route') == 'app_gallery' ? 'active' : '' }}">
+                    Toutes les catégories
+                </a>
+                {% for category in categories %}
+                    <a href="{{ path('app_gallery_category', {'category': category}) }}" 
+                    class="filter-btn {{ current_category is defined and current_category == category ? 'active' : '' }}">
+                        {{ category }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if current_category is defined %}
+            <div class="alert alert-light text-center mb-4" role="alert">
+                Vous consultez la catégorie: <strong>{{ current_category }}</strong>
+                <a href="{{ path('app_gallery') }}" class="alert-link">Voir toutes les photos</a>
+            </div>
+        {% endif %}
+
+        <div class="gallery-masonry">
+            {% for photo in photos %}
+                <div class="gallery-item" data-photo-id="{{ photo.id }}" data-photo-src="{{ asset('uploads/photos/' ~ photo.filename) }}" data-photo-title="{{ photo.title }}" data-photo-category="{{ photo.category }}">
+                    <img src="{{ asset('uploads/photos/' ~ photo.filename) }}" alt="{{ photo.title }}">
+                    <div class="gallery-overlay">
+                        <h5>{{ photo.title }}</h5>
+                        <span class="badge">{{ photo.category }}</span>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <div class="mt-2">
+                                <a href="{{ path('app_photo_edit', {'id': photo.id}) }}" class="btn btn-sm btn-light">
+                                    <i class="bi bi-pencil"></i> Modifier
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-light">
+                        {% if current_category is defined %}
+                            Aucune photo disponible dans la catégorie "{{ current_category }}".
+                        {% else %}
+                            Aucune photo disponible pour le moment.
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Lightbox personnalisé -->
+    <div class="custom-lightbox">
+        <div class="lightbox-close">
+            <i class="bi bi-x"></i>
+        </div>
+        <div class="lightbox-nav lightbox-prev">
+            <i class="bi bi-chevron-left"></i>
+        </div>
+        <div class="lightbox-nav lightbox-next">
+            <i class="bi bi-chevron-right"></i>
+        </div>
+        <div class="lightbox-image-container">
+            <img src="" alt="" class="lightbox-image">
+        </div>
+        <div class="lightbox-caption"></div>
+        <div class="lightbox-counter"></div>
+    </div>
+
+    <section class="bg-light py-5 mt-5">
+        <div class="container text-center">
+            <h2 class="mb-4">Vous avez un projet photo en tête ?</h2>
+            <p class="lead mb-4">Contactez-moi pour discuter de votre vision et créer ensemble des images qui vous ressemblent</p>
+            <a href="{{ path('app_contact') }}" class="btn btn-primary btn-lg">Prendre contact</a>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sélectionner les éléments
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            const lightbox = document.querySelector('.custom-lightbox');
+            const lightboxImage = document.querySelector('.lightbox-image');
+            const lightboxCaption = document.querySelector('.lightbox-caption');
+            const lightboxClose = document.querySelector('.lightbox-close');
+            const lightboxPrev = document.querySelector('.lightbox-prev');
+            const lightboxNext = document.querySelector('.lightbox-next');
+            const lightboxCounter = document.querySelector('.lightbox-counter');
+            
+            let currentIndex = 0;
+            const photos = [];
+            
+            // Collecter toutes les photos
+            galleryItems.forEach((item, index) => {
+                photos.push({
+                    id: item.dataset.photoId,
+                    src: item.dataset.photoSrc,
+                    title: item.dataset.photoTitle,
+                    category: item.dataset.photoCategory
+                });
+                
+                // Ajouter un événement de clic à chaque élément de la galerie
+                item.addEventListener('click', function(e) {
+                    // Éviter d'ouvrir le lightbox si on clique sur un bouton d'admin
+                    if (e.target.closest('.btn')) return;
+                    
+                    currentIndex = index;
+                    openLightbox();
+                });
+            });
+            
+            // Fonction pour ouvrir le lightbox
+            function openLightbox() {
+                updateLightboxContent();
+                lightbox.classList.add('lightbox-active');
+                // Désactiver le défilement sur le body
+                document.body.style.overflow = 'hidden';
+            }
+            
+            // Fonction pour fermer le lightbox
+            function closeLightbox() {
+                lightbox.classList.remove('lightbox-active');
+                // Réactiver le défilement sur le body
+                document.body.style.overflow = '';
+            }
+            
+            // Fonction pour mettre à jour le contenu du lightbox
+            function updateLightboxContent() {
+                if (photos.length === 0) return;
+                
+                const photo = photos[currentIndex];
+                lightboxImage.src = photo.src;
+                lightboxImage.alt = photo.title;
+                lightboxCaption.textContent = `${photo.title} - ${photo.category}`;
+                lightboxCounter.textContent = `${currentIndex + 1} / ${photos.length}`;
+            }
+            
+            // Fonction pour naviguer vers la photo précédente
+            function prevPhoto() {
+                currentIndex = (currentIndex - 1 + photos.length) % photos.length;
+                updateLightboxContent();
+            }
+            
+            // Fonction pour naviguer vers la photo suivante
+            function nextPhoto() {
+                currentIndex = (currentIndex + 1) % photos.length;
+                updateLightboxContent();
+            }
+            
+            // Ajouter les événements
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightboxPrev.addEventListener('click', prevPhoto);
+            lightboxNext.addEventListener('click', nextPhoto);
+            
+            // Fermer le lightbox en cliquant à l'extérieur de l'image
+            lightbox.addEventListener('click', function(e) {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+            
+            // Navigation avec le clavier
+            document.addEventListener('keydown', function(e) {
+                if (!lightbox.classList.contains('lightbox-active')) return;
+                
+                if (e.key === 'Escape') {
+                    closeLightbox();
+                } else if (e.key === 'ArrowLeft') {
+                    prevPhoto();
+                } else if (e.key === 'ArrowRight') {
+                    nextPhoto();
+                }
+            });
+            
+            // Empêcher que les clicks sur les boutons d'administration ne déclenchent la lightbox
+            document.querySelectorAll('.gallery-overlay a').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+        });
+    </script>
+{% endblock %} 

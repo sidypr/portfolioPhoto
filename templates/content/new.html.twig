@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau contenu - Portfolio Photo{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <h1>Ajouter un nouveau contenu</h1>
+        
+        <div class="mb-4">
+            <a href="{{ path('app_content_index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                {{ include('content/_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.wysiwyg-editor');
+            elements.forEach(element => {
+                ClassicEditor
+                    .create(element)
+                    .catch(error => {
+                        console.error(error);
+                    });
+            });
+        });
+    </script>
+{% endblock %} 

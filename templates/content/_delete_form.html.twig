@@ -1,0 +1,16 @@
+<div class="card border-danger">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">Zone de danger</h5>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">Supprimer ce contenu</h5>
+        <p class="card-text">Attention, cette action est irréversible et supprimera définitivement ce contenu et son image associée.</p>
+        
+        <form method="post" action="{{ path('app_content_delete', {'id': content.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce contenu ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ content.id) }}">
+            <button class="btn btn-outline-danger">
+                <i class="bi bi-trash"></i> Supprimer
+            </button>
+        </form>
+    </div>
+</div> 
