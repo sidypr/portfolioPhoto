@@ -24,7 +24,7 @@ class ContentRepository extends ServiceEntityRepository
     /**
      * Trouve un contenu par son identifiant, le crée s'il n'existe pas
      */
-    public function findOrCreateByIdentifier(string $identifier, string $defaultTitle = '', string $defaultContent = '', string $section = null): Content
+    public function findOrCreateByIdentifier(string $identifier, string $defaultTitle = '', string $defaultContent = '', ?string $section = null): Content
     {
         $content = $this->findOneBy(['identifier' => $identifier]);
         
